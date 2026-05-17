@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+  id        String     @id @default(uuid())
+  name      String
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+  menuItems MenuItem[]
+}
+
+model MenuItem {
+  id           String         @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id])
+  categoryId   String
+  name         String
+  description  String
+  price        Float
+  calories     Int
+  imageUrl     String
+  modelUrl     String?
+  usdzUrl      String?
+  ingredients  Json
+  isRecommended Boolean      @default(false)
+  heat         Int            @default(0)
+  status       String         @default("PENDING")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  jobs         ProcessingJob[]
+}
+
+model ProcessingJob {
+  id            String    @id @default(uuid())
+  jobId         String    @unique
+  itemId        String
+  item          MenuItem  @relation(fields: [itemId], references: [id])
+  status        String    @default("PENDING")
+  s3VideoUrl    String?
+  modelUrl      String?
+  errorMessage  String?
+  progressPct   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
